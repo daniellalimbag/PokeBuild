@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+<color name="lavender_indigo">#9747FF</color>
+<color name="black">#0A0A0A</color>
+<color name="white">#FAFAFA</color>
+<color name="boulder">#7A7A7A</color>
+<color name="bluish_purple">#B699F7</color>
+<color name="onyx">#141414</color>
 </resources>
