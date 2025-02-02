@@ -40,7 +40,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.TeamDetailsActivity" />
         </activity>
-
+        <activity
+            android:name=".activity.SearchActivity"
+            android:label="Search"
+            android:parentActivityName=".activity.PokemonDetailsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PokemonDetailsActivity" />
+        </activity>
     </application>
 
 </manifest>
