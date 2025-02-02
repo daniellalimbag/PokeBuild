@@ -3,6 +3,7 @@ package com.pokebuild.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class Pokemon implements Serializable {
     private int dexNum;
@@ -12,16 +13,25 @@ public class Pokemon implements Serializable {
     private String type;
     private String ability;
     private List<String> moves;
+    private String item;
 
     // Constructor
-    public Pokemon(int dexNum, String name, String url, String sprite, String type, String ability, List<String> moves) {
+    public Pokemon(int dexNum, String name, String url, String sprite, String type, String ability, String moves, String item) {
         this.dexNum = dexNum;
         this.name = name;
         this.url = url;
         this.sprite = sprite;
         this.type = type;
         this.ability = ability;
-        setMoves(moves); // Using setter to enforce the limit
+        this.moves = parseMovesString(moves); // Parse the moves string into a list
+        this.item = item;
+    }
+
+    private List<String> parseMovesString(String movesString) {
+        if (movesString != null && !movesString.isEmpty()) {
+            return Arrays.asList(movesString.split(",\\s*")); // Split by comma and optional spaces
+        }
+        return new ArrayList<>();
     }
 
     // Getters and setters for all fields
@@ -79,7 +89,7 @@ public class Pokemon implements Serializable {
 
     public void setMoves(List<String> moves) {
         if (moves != null && moves.size() > 4) {
-            this.moves = new ArrayList<>(moves.subList(0, 4)); // Trim the list to the first 4 moves
+            this.moves = new ArrayList<>(moves.subList(0, 4));
         } else {
             this.moves = moves;
         }
@@ -94,5 +104,13 @@ public class Pokemon implements Serializable {
         } else {
             System.out.println("A Pokémon can only have up to 4 moves.");
         }
+    }
+
+    public String getItemName() {
+        return item;
+    }
+
+    public void setItemName(String itemName) {
+        this.item = itemName;
     }
 }
