@@ -32,6 +32,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.MainActivity" />
         </activity>
+        <activity
+            android:name=".activity.PokemonDetailsActivity"
+            android:label="Pokemon Details"
+            android:parentActivityName=".activity.TeamDetailsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.TeamDetailsActivity" />
+        </activity>
+
     </application>
 
 </manifest>
