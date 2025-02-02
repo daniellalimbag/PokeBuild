@@ -64,6 +64,25 @@ public class DatabaseManager {
         return team;
     }
 
+    public Team getTeamByName(String teamName) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Team team = null;
+
+        String query = "SELECT * FROM " + MyDatabaseHelper.TEAM_TABLE + " WHERE " + MyDatabaseHelper.TEAM_NAME + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{teamName});
+
+        if (cursor.moveToFirst()) {
+            @SuppressLint("Range") String pokemonIdsStr = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_POKEMON_IDS));
+            List<Pokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
+            team = new Team();
+            team.setName(teamName);
+            team.setTeam(pokemonList);
+        }
+        cursor.close();
+        db.close();
+        return team;
+    }
+
     private List<Pokemon> getPokemonsByIds(String pokemonIdsStr) {
         List<Pokemon> pokemonList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -80,9 +99,10 @@ public class DatabaseManager {
                 @SuppressLint("Range") String sprite = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_SPRITE));
                 @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_TYPE));
                 @SuppressLint("Range") String ability = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_ABILITY));
-                List<String> moves = null; // Populate moves as needed
+                @SuppressLint("Range") String moves = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_MOVES));
+                @SuppressLint("Range") String item = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_ITEM));
 
-                Pokemon pokemon = new Pokemon(dexNum, name, url, sprite, type, ability, moves);
+                Pokemon pokemon = new Pokemon(dexNum, name, url, sprite, type, ability, moves, item);
                 pokemonList.add(pokemon);
             }
             cursor.close();
@@ -90,6 +110,7 @@ public class DatabaseManager {
         db.close();
         return pokemonList;
     }
+
 
     public List<Pokemon> getPokemonsByTeamId(int teamId) {
         Team team = getTeamById(teamId);
@@ -131,6 +152,7 @@ public class DatabaseManager {
             contentValues.put(MyDatabaseHelper.POKEMON_TYPE, pokemon.getType());
             contentValues.put(MyDatabaseHelper.POKEMON_ABILITY, pokemon.getAbility());
             contentValues.put(MyDatabaseHelper.POKEMON_MOVES, pokemon.getMoves() != null ? pokemon.getMoves().toString() : null);
+            contentValues.put(MyDatabaseHelper.POKEMON_ITEM, pokemon.getItemName()); // Add item
             return db.insert(MyDatabaseHelper.POKEMON_TABLE, null, contentValues);
         } catch (Exception e) {
             Log.e("DatabaseLog", "Error inserting Pokémon", e);

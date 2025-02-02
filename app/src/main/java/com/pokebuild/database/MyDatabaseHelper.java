@@ -20,12 +20,13 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     public static final String POKEMON_TYPE = "type";
     public static final String POKEMON_ABILITY = "ability";
     public static final String POKEMON_MOVES = "moves";
+    public static final String POKEMON_ITEM = "item";
 
     // Table: Team
     public static final String TEAM_TABLE = "Team";
     public static final String TEAM_ID = "team_id";
     public static final String TEAM_NAME = "team_name";
-    public static final String TEAM_POKEMON_IDS = "pokemon_ids"; // JSON or CSV string of Pokémon IDs
+    public static final String TEAM_POKEMON_IDS = "pokemon_ids";
 
     public MyDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -43,12 +44,13 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 + POKEMON_SPRITE + " TEXT NOT NULL, "
                 + POKEMON_TYPE + " TEXT NOT NULL, "
                 + POKEMON_ABILITY + " TEXT NOT NULL, "
-                + POKEMON_MOVES + " TEXT NOT NULL)";
+                + POKEMON_MOVES + " TEXT NOT NULL, "
+                + POKEMON_ITEM + " TEXT)"; // Add item column
 
         String createTeamTableQuery = "CREATE TABLE " + TEAM_TABLE + " ("
                 + TEAM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + TEAM_NAME + " TEXT NOT NULL, "
-                + TEAM_POKEMON_IDS + " TEXT NOT NULL)"; // Pokémon IDs stored as JSON or CSV string
+                + TEAM_POKEMON_IDS + " TEXT NOT NULL)";
 
         db.execSQL(createPokemonTableQuery);
         db.execSQL(createTeamTableQuery);
@@ -75,6 +77,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(POKEMON_TYPE, "Grass/Poison");
         contentValues.put(POKEMON_ABILITY, "Overgrow");
         contentValues.put(POKEMON_MOVES, "Tackle, Growl, Leech Seed");
+        contentValues.put(POKEMON_ITEM, "leftovers"); // Add item
         db.insert(POKEMON_TABLE, null, contentValues);
 
         contentValues.clear();
@@ -85,6 +88,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(POKEMON_TYPE, "Fire");
         contentValues.put(POKEMON_ABILITY, "Blaze");
         contentValues.put(POKEMON_MOVES, "Scratch, Growl, Ember");
+        contentValues.put(POKEMON_ITEM, "charcoal"); // Add item
         db.insert(POKEMON_TABLE, null, contentValues);
 
         contentValues.clear();
@@ -95,17 +99,19 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(POKEMON_TYPE, "Water");
         contentValues.put(POKEMON_ABILITY, "Torrent");
         contentValues.put(POKEMON_MOVES, "Tackle, Tail Whip, Water Gun");
+        contentValues.put(POKEMON_ITEM, "mystic water"); // Add item
         db.insert(POKEMON_TABLE, null, contentValues);
     }
 
     private void insertTeamDummyValues(SQLiteDatabase db) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TEAM_NAME, "Starter Team");
-        contentValues.put(TEAM_POKEMON_IDS, "[1, 2, 3]"); // Pokémon IDs stored as JSON or CSV string
+        contentValues.put(TEAM_POKEMON_IDS, "[1, 2, 3]");
         db.insert(TEAM_TABLE, null, contentValues);
 
         contentValues.clear();
         contentValues.put(TEAM_NAME, "Team 2");
+        contentValues.put(TEAM_POKEMON_IDS, "[1, 2]");
         db.insert(TEAM_TABLE, null, contentValues);
     }
 }
