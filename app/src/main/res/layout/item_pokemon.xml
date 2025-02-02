@@ -50,6 +50,7 @@
                 android:id="@+id/itemIv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@color/white"
                 tools:srcCompat="@tools:sample/avatars" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
