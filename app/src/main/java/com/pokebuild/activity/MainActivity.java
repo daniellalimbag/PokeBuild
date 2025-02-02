@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         // Add a new team (you can customize this method to add actual new teams)
         List<Pokemon> newPokemonList = new ArrayList<>();
         newPokemonList.add(new Pokemon(10, "Caterpie", "https://pokeapi.co/api/v2/pokemon/10/",
-                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png", "Bug", "Shield Dust", null));
+                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png", "Bug", "Shield Dust", null, "Leftovers"));
 
         Team newTeam = new Team();
         newTeam.setName("New Team");
