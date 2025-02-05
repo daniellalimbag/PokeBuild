@@ -52,4 +52,5 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.navigation.fragment)
+    implementation ("com.github.oscar0812:pokeapi:1.0.0")
 }
