@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.pokebuild.R;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.squareup.picasso.Picasso;
 
 public class SpriteViewHolder extends RecyclerView.ViewHolder {
@@ -17,7 +17,7 @@ public class SpriteViewHolder extends RecyclerView.ViewHolder {
         pokemonImageView = itemView.findViewById(R.id.pokemonSiv);
     }
 
-    public void bind(Pokemon pokemon) {
+    public void bind(OwnedPokemon pokemon) {
         if (pokemon != null) {
             Log.d("SpriteViewHolder", "Loading sprite URL: " + pokemon.getSprite());
             Picasso.get()

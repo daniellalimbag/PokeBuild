@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.pokebuild.R;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.squareup.picasso.Picasso;
 
 public class PokemonViewHolder extends RecyclerView.ViewHolder {
@@ -22,7 +22,7 @@ public class PokemonViewHolder extends RecyclerView.ViewHolder {
         itemImageView = itemView.findViewById(R.id.itemIv);
     }
 
-    public void bind(Pokemon pokemon) {
+    public void bind(OwnedPokemon pokemon) {
         if (pokemon != null) {
             Picasso.get()
                     .load(pokemon.getSprite())
@@ -54,7 +54,7 @@ public class PokemonViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    private String getItemUrlForPokemon(Pokemon pokemon) {
+    private String getItemUrlForPokemon(OwnedPokemon pokemon) {
         String itemName = pokemon.getItemName();
         if (itemName != null && !itemName.isEmpty()) {
             return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/" + itemName.toLowerCase().replace(' ', '-') + ".png";

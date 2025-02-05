@@ -7,15 +7,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.pokebuild.R;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.pokebuild.viewholder.SpriteViewHolder;
 import java.util.List;
 
 public class SpriteAdapter extends RecyclerView.Adapter<SpriteViewHolder> {
     private final Context context;
-    private final List<Pokemon> pokemonList;
+    private final List<OwnedPokemon> pokemonList;
 
-    public SpriteAdapter(Context context, List<Pokemon> pokemonList) {
+    public SpriteAdapter(Context context, List<OwnedPokemon> pokemonList) {
         this.context = context;
         this.pokemonList = pokemonList;
     }
@@ -29,7 +29,7 @@ public class SpriteAdapter extends RecyclerView.Adapter<SpriteViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull SpriteViewHolder holder, int position) {
-        Pokemon pokemon = pokemonList.get(position);
+        OwnedPokemon pokemon = pokemonList.get(position);
         holder.bind(pokemon);
     }
 

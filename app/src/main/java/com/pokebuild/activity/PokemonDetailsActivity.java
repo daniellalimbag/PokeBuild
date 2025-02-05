@@ -7,9 +7,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.github.oscar0812.pokeapi.models.pokemon.Pokemon;
+import com.github.oscar0812.pokeapi.utils.Client;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.pokebuild.R;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -22,7 +25,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     private ShapeableImageView pokemonSiv;
     private TextView dexTv, typeTv, abilityTv, itemTv, pokemonTv;
     private TextView move1Tv, move2Tv, move3Tv, move4Tv;
-    private Pokemon pokemon;
+    private OwnedPokemon pokemon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +56,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         // Retrieve Pokémon data from intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("POKEMON")) {
-            pokemon = (Pokemon) intent.getSerializableExtra("POKEMON");
+            pokemon = (OwnedPokemon) intent.getSerializableExtra("POKEMON");
 
             // Set Pokémon details
             Picasso.get()
@@ -88,7 +91,43 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         move3Ibtn.setOnClickListener(v -> startSearchActivity(false, false, false, true));
         move4Ibtn.setOnClickListener(v -> startSearchActivity(false, false, false, true));
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SEARCH && resultCode == RESULT_OK && data != null) {
+            if (data.hasExtra("selectedAbility")) {
+                String selectedAbility = data.getStringExtra("selectedAbility");
+                abilityTv.setText(selectedAbility);
+                pokemon.setAbility(selectedAbility);
+            } else if (data.hasExtra("selectedPokemon")) {
+                OwnedPokemon selectedPokemon = (OwnedPokemon) data.getSerializableExtra("selectedPokemon");
+                if (selectedPokemon != null) {
+                    // Update the pokemon reference
+                    pokemon = selectedPokemon;
+                    // Update UI elements with new Pokemon data
+                    pokemonTv.setText(pokemon.getName());
+                    dexTv.setText("National Dex #" + pokemon.getDexNum());
+                    typeTv.setText(pokemon.getType());
+                    abilityTv.setText(pokemon.getAbility());
+                    itemTv.setText(pokemon.getItemName());
 
+                    // Update Pokemon sprite
+                    Picasso.get()
+                            .load(pokemon.getSprite())
+                            .placeholder(R.drawable.placeholder_image)
+                            .error(R.drawable.error_image)
+                            .into(pokemonSiv);
+
+                    // Update moves display
+                    List<String> moves = pokemon.getMoves();
+                    move1Tv.setText((moves != null && moves.size() > 0) ? moves.get(0) : "");
+                    move2Tv.setText((moves != null && moves.size() > 1) ? moves.get(1) : "");
+                    move3Tv.setText((moves != null && moves.size() > 2) ? moves.get(2) : "");
+                    move4Tv.setText((moves != null && moves.size() > 3) ? moves.get(3) : "");
+                }
+            }
+        }
+    }
     private void startSearchActivity(boolean isSearchingPokemon, boolean isSearchingAbility, boolean isSearchingItem, boolean isSearchingMove) {
         if ((isSearchingAbility || isSearchingMove) && pokemon == null) {
             Toast.makeText(this, "Please select a Pokémon first", Toast.LENGTH_SHORT).show();
@@ -100,8 +139,14 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         searchIntent.putExtra("isSearchingAbility", isSearchingAbility);
         searchIntent.putExtra("isSearchingItem", isSearchingItem);
         searchIntent.putExtra("isSearchingMove", isSearchingMove);
-        searchIntent.putExtra("selectedPokemon", pokemon);
-        startActivity(searchIntent);
-        Log.d("PokemonDetailsActivity", "Starting SearchActivity with isSearchingPokemon: " + isSearchingPokemon);
+
+        // Pass the Pokemon's name when searching for abilities
+        if (isSearchingAbility) {
+            searchIntent.putExtra("selectedPokemon", pokemon.getName());
+        } else {
+            searchIntent.putExtra("selectedPokemon", pokemon);
+        }
+
+        startActivityForResult(searchIntent, REQUEST_CODE_SEARCH);  // Use startActivityForResult instead
     }
 }

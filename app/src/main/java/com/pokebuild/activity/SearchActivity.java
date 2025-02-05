@@ -11,11 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.pokebuild.R;
 import com.pokebuild.adapter.SearchResultAdapter;
 import com.pokebuild.api.PokemonAPIClient;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
+import com.pokebuild.model.PokemonDetailResponse;
 import com.pokebuild.model.PokemonListResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import com.github.oscar0812.pokeapi.models.pokemon.Pokemon;
+import com.github.oscar0812.pokeapi.utils.Client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +31,16 @@ public class SearchActivity extends AppCompatActivity {
 
     private RecyclerView resultsRv;
     private SearchView searchView;
-    private List<Pokemon> allPokemon = new ArrayList<>();
+    private List<OwnedPokemon> allPokemon = new ArrayList<>();
     private boolean isSearchingPokemon = false;
+    private boolean isSearchingAbility = false;
+    private List<String> abilityList = new ArrayList<>();
+    private String selectedPokemon;
     private SearchResultAdapter searchResultAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: Starting SearchActivity");
         setContentView(R.layout.search_layout);
 
         // Initialize views
@@ -46,30 +51,39 @@ public class SearchActivity extends AppCompatActivity {
         resultsRv.setHasFixedSize(true);
         resultsRv.setLayoutManager(new LinearLayoutManager(this));
 
-        // Determine the context of the search
+        // Get search type from intent
         Intent intent = getIntent();
         isSearchingPokemon = intent.getBooleanExtra("isSearchingPokemon", false);
-        Log.d(TAG, "onCreate: isSearchingPokemon: " + isSearchingPokemon);
+        isSearchingAbility = intent.getBooleanExtra("isSearchingAbility", false);
 
-        // Initialize the adapter
+        // Initialize the adapter with appropriate click handler
         searchResultAdapter = new SearchResultAdapter(
-                allPokemon,
+                new ArrayList<>(),
                 pokemon -> {
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra("selectedPokemon", pokemon);
+                    if (isSearchingAbility) {
+                        // For abilities, just send back the ability name
+                        resultIntent.putExtra("selectedAbility", pokemon.getAbility());
+                    } else {
+                        // For Pokemon, send the whole Pokemon object
+                        resultIntent.putExtra("selectedPokemon", pokemon);
+                    }
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 }
         );
         resultsRv.setAdapter(searchResultAdapter);
-        Log.d(TAG, "onCreate: Adapter set");
 
-        // Fetch data
-        if (isSearchingPokemon) {
+        // Fetch appropriate data
+        if (isSearchingAbility) {
+            String pokemonName = intent.getStringExtra("selectedPokemon");
+            if (pokemonName != null) {
+                fetchPokemonAbilities(pokemonName);
+            }
+        } else if (isSearchingPokemon) {
             fetchPokemonData();
         }
 
-        // Set up SearchView
         setupSearchView();
     }
 
@@ -90,7 +104,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private void filterList(String query) {
         if (query != null) {
-            List<Pokemon> filteredList = allPokemon.stream()
+            List<OwnedPokemon> filteredList = allPokemon.stream()
                     .filter(pokemon -> pokemon.getName().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
                     .collect(Collectors.toList());
 
@@ -102,31 +116,20 @@ public class SearchActivity extends AppCompatActivity {
     private void fetchPokemonData() {
         Log.d(TAG, "fetchPokemonData: Starting to fetch Pokémon data...");
         // Make API call to fetch Pokémon list
-        PokemonAPIClient.getApi().getPokemonList(1000).enqueue(new Callback<PokemonListResponse>() {
+        PokemonAPIClient.getApi().getPokemonList(1025).enqueue(new Callback<PokemonListResponse>() {
             @Override
             public void onResponse(Call<PokemonListResponse> call, Response<PokemonListResponse> response) {
                 if (response.isSuccessful()) {
-                    List<Pokemon> pokemonList = response.body().getResults();
+                    List<OwnedPokemon> pokemonList = response.body().getResults();
                     if (pokemonList != null) {
                         allPokemon.clear();
                         Log.d(TAG, "fetchPokemonData: Received Pokémon list with size: " + pokemonList.size());
-                        for (Pokemon result : pokemonList) {
+                        for (OwnedPokemon result : pokemonList) {
                             // Extract Dex Num from URL
                             int dexNum = Integer.parseInt(result.getUrl().split("/")[6]);
-                            // Create a Pokemon object for each result
-                            Pokemon pokemon = new Pokemon(
-                                    dexNum,
-                                    result.getName(),
-                                    result.getUrl(),
-                                    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + dexNum + ".png",
-                                    null, null, null, null
-                            );
-                            allPokemon.add(pokemon);
-                            Log.d(TAG, "fetchPokemonData: Added Pokémon: " + pokemon.getName() + ", Sprite: " + pokemon.getSprite());
+                            // Fetch detailed Pokémon data to get type information
+                            fetchPokemonDetail(dexNum, result.getName(), result.getUrl());
                         }
-                        // Update the adapter with the new list
-                        searchResultAdapter.updateData(allPokemon);
-                        Log.d(TAG, "fetchPokemonData: Adapter updated with new Pokémon data, total count: " + allPokemon.size());
                     } else {
                         Log.e(TAG, "fetchPokemonData: Pokemon list is null");
                     }
@@ -140,6 +143,76 @@ public class SearchActivity extends AppCompatActivity {
             public void onFailure(Call<PokemonListResponse> call, Throwable t) {
                 Log.e(TAG, "fetchPokemonData: Error fetching Pokémon data", t);
                 Toast.makeText(SearchActivity.this, "Error fetching Pokémon data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchPokemonDetail(int dexNum, String name, String url) {
+        PokemonAPIClient.getApi().getPokemonByName(name).enqueue(new Callback<PokemonDetailResponse>() {
+            @Override
+            public void onResponse(Call<PokemonDetailResponse> call, Response<PokemonDetailResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<PokemonDetailResponse.TypeWrapper> types = response.body().getTypes();
+                    String type = types != null && !types.isEmpty() ? types.get(0).getType().getName() : null; // Assuming first type
+
+                    OwnedPokemon pokemon = new OwnedPokemon(
+                            dexNum,
+                            name,
+                            url,
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + dexNum + ".png",
+                            type, null, null, null
+                    );
+
+                    allPokemon.add(pokemon);
+                    Log.d(TAG, "fetchPokemonDetail: Added Pokémon: " + pokemon.getName() + ", Type: " + pokemon.getType());
+                    searchResultAdapter.updateData(new ArrayList<>(allPokemon)); // Update adapter with new data
+                } else {
+                    Log.e(TAG, "fetchPokemonDetail: Failed to load Pokémon details");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PokemonDetailResponse> call, Throwable t) {
+                Log.e(TAG, "fetchPokemonDetail: Error fetching Pokémon details", t);
+            }
+        });
+    }
+
+    private void fetchPokemonAbilities(String pokemonName) {
+        PokemonAPIClient.getApi().getPokemonByName(pokemonName).enqueue(new Callback<PokemonDetailResponse>() {
+            @Override
+            public void onResponse(Call<PokemonDetailResponse> call, Response<PokemonDetailResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> abilities = response.body().getAbilities().stream()
+                            .map(wrapper -> wrapper.getAbility().getName())
+                            .collect(Collectors.toList());
+
+                    // Create OwnedPokemon objects for abilities
+                    List<OwnedPokemon> abilityPokemon = abilities.stream()
+                            .map(ability -> new OwnedPokemon(
+                                    0,
+                                    "",  // Empty name since we're using ability
+                                    "",
+                                    "",
+                                    "",
+                                    ability,  // Store ability name here
+                                    "",
+                                    ""
+                            ))
+                            .collect(Collectors.toList());
+
+                    // Update adapter with the abilities
+                    allPokemon.clear();
+                    allPokemon.addAll(abilityPokemon);
+                    searchResultAdapter.updateData(abilityPokemon);
+                } else {
+                    Toast.makeText(SearchActivity.this, "Failed to load abilities", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PokemonDetailResponse> call, Throwable t) {
+                Toast.makeText(SearchActivity.this, "Error fetching abilities", Toast.LENGTH_SHORT).show();
             }
         });
     }

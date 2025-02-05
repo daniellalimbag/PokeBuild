@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Team implements Serializable {
     private String name;
-    private List<Pokemon> team;
+    private List<OwnedPokemon> team;
 
     // Constructor
     public Team() {
@@ -17,11 +17,11 @@ public class Team implements Serializable {
     }
 
     // Getters and setters for the team list
-    public List<Pokemon> getTeam() {
+    public List<OwnedPokemon> getTeam() {
         return team;
     }
 
-    public void setTeam(List<Pokemon> team) {
+    public void setTeam(List<OwnedPokemon> team) {
         if (team.size() <= 6) {
             this.team = team;
         } else {
@@ -39,7 +39,7 @@ public class Team implements Serializable {
     }
 
     // Add a new Pokemon to the first available slot
-    public boolean addPokemon(Pokemon pokemon) {
+    public boolean addPokemon(OwnedPokemon pokemon) {
         for (int i = 0; i < team.size(); i++) {
             if (team.get(i) == null) {
                 team.set(i, pokemon);
@@ -50,7 +50,7 @@ public class Team implements Serializable {
     }
 
     // Remove a Pokemon from the team
-    public boolean removePokemon(Pokemon pokemon) {
+    public boolean removePokemon(OwnedPokemon pokemon) {
         for (int i = 0; i < team.size(); i++) {
             if (team.get(i) != null && team.get(i).equals(pokemon)) {
                 team.set(i, null);
@@ -60,7 +60,7 @@ public class Team implements Serializable {
         return false; // Pokemon not found
     }
 
-    public Pokemon getPokemonAt(int index) {
+    public OwnedPokemon getPokemonAt(int index) {
         if (index >= 0 && index < 6) {
             return team.get(index);
         } else {

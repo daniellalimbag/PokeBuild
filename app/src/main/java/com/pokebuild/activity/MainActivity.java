@@ -9,7 +9,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.pokebuild.R;
 import com.pokebuild.adapter.TeamAdapter;
 import com.pokebuild.database.DatabaseManager;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.pokebuild.model.Team;
 import com.pokebuild.model.Teams;
 
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         Teams teams = dbManager.getAllTeams();
         for (Team team : teams.getTeams()) {
             Log.d("DatabaseLog", "Team: " + team.getName());
-            for (Pokemon pokemon : team.getTeam()) {
+            for (OwnedPokemon pokemon : team.getTeam()) {
                 Log.d("DatabaseLog", "Pokémon: " + pokemon.getName() + ", " + pokemon.getType() + ", " + pokemon.getAbility());
             }
         }
@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void addNewTeam() {
         // Add a new team (you can customize this method to add actual new teams)
-        List<Pokemon> newPokemonList = new ArrayList<>();
-        newPokemonList.add(new Pokemon(10, "Caterpie", "https://pokeapi.co/api/v2/pokemon/10/",
+        List<OwnedPokemon> newPokemonList = new ArrayList<>();
+        newPokemonList.add(new OwnedPokemon(10, "Caterpie", "https://pokeapi.co/api/v2/pokemon/10/",
                 "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png", "Bug", "Shield Dust", null, "Leftovers"));
 
         Team newTeam = new Team();

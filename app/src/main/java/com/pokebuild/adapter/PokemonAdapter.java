@@ -9,16 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.pokebuild.R;
 import com.pokebuild.activity.PokemonDetailsActivity;
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.pokebuild.viewholder.PokemonViewHolder;
 
 import java.util.List;
 
 public class PokemonAdapter extends RecyclerView.Adapter<PokemonViewHolder> {
     private final Context context;
-    private final List<Pokemon> pokemonList;
+    private final List<OwnedPokemon> pokemonList;
 
-    public PokemonAdapter(Context context, List<Pokemon> pokemonList) {
+    public PokemonAdapter(Context context, List<OwnedPokemon> pokemonList) {
         this.context = context;
         this.pokemonList = pokemonList;
     }
@@ -32,7 +32,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull PokemonViewHolder holder, int position) {
-        Pokemon pokemon = pokemonList.get(position);
+        OwnedPokemon pokemon = pokemonList.get(position);
         holder.bind(pokemon);
 
         // Set click listener for the item

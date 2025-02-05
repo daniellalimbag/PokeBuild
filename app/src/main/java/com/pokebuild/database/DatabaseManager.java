@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.pokebuild.model.Pokemon;
+import com.pokebuild.model.OwnedPokemon;
 import com.pokebuild.model.Team;
 import com.pokebuild.model.Teams;
 
@@ -32,7 +32,7 @@ public class DatabaseManager {
             do {
                 @SuppressLint("Range") String teamName = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_NAME));
                 @SuppressLint("Range") String pokemonIdsStr = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_POKEMON_IDS));
-                List<Pokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
+                List<OwnedPokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
                 Team team = new Team();
                 team.setName(teamName);
                 team.setTeam(pokemonList);
@@ -54,7 +54,7 @@ public class DatabaseManager {
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") String teamName = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_NAME));
             @SuppressLint("Range") String pokemonIdsStr = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_POKEMON_IDS));
-            List<Pokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
+            List<OwnedPokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
             team = new Team();
             team.setName(teamName);
             team.setTeam(pokemonList);
@@ -73,7 +73,7 @@ public class DatabaseManager {
 
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") String pokemonIdsStr = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.TEAM_POKEMON_IDS));
-            List<Pokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
+            List<OwnedPokemon> pokemonList = getPokemonsByIds(pokemonIdsStr);
             team = new Team();
             team.setName(teamName);
             team.setTeam(pokemonList);
@@ -83,8 +83,8 @@ public class DatabaseManager {
         return team;
     }
 
-    private List<Pokemon> getPokemonsByIds(String pokemonIdsStr) {
-        List<Pokemon> pokemonList = new ArrayList<>();
+    private List<OwnedPokemon> getPokemonsByIds(String pokemonIdsStr) {
+        List<OwnedPokemon> pokemonList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] pokemonIds = pokemonIdsStr.replace("[", "").replace("]", "").split(",");
@@ -102,7 +102,7 @@ public class DatabaseManager {
                 @SuppressLint("Range") String moves = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_MOVES));
                 @SuppressLint("Range") String item = cursor.getString(cursor.getColumnIndex(MyDatabaseHelper.POKEMON_ITEM));
 
-                Pokemon pokemon = new Pokemon(dexNum, name, url, sprite, type, ability, moves, item);
+                OwnedPokemon pokemon = new OwnedPokemon(dexNum, name, url, sprite, type, ability, moves, item);
                 pokemonList.add(pokemon);
             }
             cursor.close();
@@ -112,7 +112,7 @@ public class DatabaseManager {
     }
 
 
-    public List<Pokemon> getPokemonsByTeamId(int teamId) {
+    public List<OwnedPokemon> getPokemonsByTeamId(int teamId) {
         Team team = getTeamById(teamId);
         return team != null ? team.getTeam() : new ArrayList<>();
     }
@@ -123,7 +123,7 @@ public class DatabaseManager {
         try {
             ContentValues contentValues = new ContentValues();
             List<Integer> pokemonIds = new ArrayList<>();
-            for (Pokemon pokemon : team.getTeam()) {
+            for (OwnedPokemon pokemon : team.getTeam()) {
                 long pokemonId = insertPokemon(pokemon);
                 if (pokemonId != -1) {
                     pokemonIds.add((int) pokemonId);
@@ -141,7 +141,7 @@ public class DatabaseManager {
     }
 
     // Helper method to insert a Pokémon into the database
-    private long insertPokemon(Pokemon pokemon) {
+    private long insertPokemon(OwnedPokemon pokemon) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
             ContentValues contentValues = new ContentValues();
