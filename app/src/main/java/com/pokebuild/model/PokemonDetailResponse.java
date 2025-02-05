@@ -2,6 +2,7 @@ package com.pokebuild.model;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PokemonDetailResponse {
     @SerializedName("abilities")
@@ -16,6 +17,13 @@ public class PokemonDetailResponse {
 
     public List<TypeWrapper> getTypes() {
         return types;
+    }
+
+    // Method to return types as a comma-separated string
+    public String getTypesAsString() {
+        return types.stream()
+                .map(typeWrapper -> typeWrapper.getType().getName())
+                .collect(Collectors.joining(", "));
     }
 
     public static class AbilityWrapper {

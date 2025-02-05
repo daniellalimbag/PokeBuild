@@ -152,19 +152,18 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<PokemonDetailResponse> call, Response<PokemonDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<PokemonDetailResponse.TypeWrapper> types = response.body().getTypes();
-                    String type = types != null && !types.isEmpty() ? types.get(0).getType().getName() : null; // Assuming first type
+                    String types = response.body().getTypesAsString();
 
                     OwnedPokemon pokemon = new OwnedPokemon(
                             dexNum,
                             name,
                             url,
                             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + dexNum + ".png",
-                            type, null, null, null
+                            types, null, null, null
                     );
 
                     allPokemon.add(pokemon);
-                    Log.d(TAG, "fetchPokemonDetail: Added Pokémon: " + pokemon.getName() + ", Type: " + pokemon.getType());
+                    Log.d(TAG, "fetchPokemonDetail: Added Pokémon: " + pokemon.getName() + ", Types: " + pokemon.getType());
                     searchResultAdapter.updateData(new ArrayList<>(allPokemon)); // Update adapter with new data
                 } else {
                     Log.e(TAG, "fetchPokemonDetail: Failed to load Pokémon details");
@@ -177,6 +176,7 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void fetchPokemonAbilities(String pokemonName) {
         PokemonAPIClient.getApi().getPokemonByName(pokemonName).enqueue(new Callback<PokemonDetailResponse>() {
