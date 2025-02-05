@@ -125,9 +125,15 @@ public class PokemonDetailsActivity extends AppCompatActivity {
                     move3Tv.setText((moves != null && moves.size() > 2) ? moves.get(2) : "");
                     move4Tv.setText((moves != null && moves.size() > 3) ? moves.get(3) : "");
                 }
+            } else if (data.hasExtra("selectedItem")) {  // ✅ Handling for selected item
+                String selectedItem = data.getStringExtra("selectedItem");
+                itemTv.setText(selectedItem);
+                pokemon.setItemName(selectedItem);
             }
         }
     }
+
+
     private void startSearchActivity(boolean isSearchingPokemon, boolean isSearchingAbility, boolean isSearchingItem, boolean isSearchingMove) {
         if ((isSearchingAbility || isSearchingMove) && pokemon == null) {
             Toast.makeText(this, "Please select a Pokémon first", Toast.LENGTH_SHORT).show();

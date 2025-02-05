@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.pokebuild.R;
 import com.pokebuild.adapter.SearchResultAdapter;
 import com.pokebuild.api.PokemonAPIClient;
+import com.pokebuild.model.ItemResponseList;
 import com.pokebuild.model.OwnedPokemon;
 import com.pokebuild.model.PokemonDetailResponse;
 import com.pokebuild.model.PokemonListResponse;
@@ -34,8 +35,9 @@ public class SearchActivity extends AppCompatActivity {
     private List<OwnedPokemon> allPokemon = new ArrayList<>();
     private boolean isSearchingPokemon = false;
     private boolean isSearchingAbility = false;
+    private boolean isSearchingItem = false;
     private List<String> abilityList = new ArrayList<>();
-    private String selectedPokemon;
+    private List<String> allItems = new ArrayList<>();
     private SearchResultAdapter searchResultAdapter;
 
     @Override
@@ -55,22 +57,28 @@ public class SearchActivity extends AppCompatActivity {
         Intent intent = getIntent();
         isSearchingPokemon = intent.getBooleanExtra("isSearchingPokemon", false);
         isSearchingAbility = intent.getBooleanExtra("isSearchingAbility", false);
+        isSearchingItem = intent.getBooleanExtra("isSearchingItem", false);
 
         // Initialize the adapter with appropriate click handler
         searchResultAdapter = new SearchResultAdapter(
                 new ArrayList<>(),
-                pokemon -> {
+                item -> {
                     Intent resultIntent = new Intent();
                     if (isSearchingAbility) {
                         // For abilities, just send back the ability name
-                        resultIntent.putExtra("selectedAbility", pokemon.getAbility());
+                        resultIntent.putExtra("selectedAbility", item.toString());
+                    } else if (isSearchingItem) {
+                        // For items, just send back the item name
+                        resultIntent.putExtra("selectedItem", item.toString());
                     } else {
                         // For Pokemon, send the whole Pokemon object
-                        resultIntent.putExtra("selectedPokemon", pokemon);
+                        resultIntent.putExtra("selectedPokemon", (OwnedPokemon) item);
                     }
                     setResult(RESULT_OK, resultIntent);
                     finish();
-                }
+                },
+                isSearchingAbility,
+                isSearchingItem
         );
         resultsRv.setAdapter(searchResultAdapter);
 
@@ -82,6 +90,8 @@ public class SearchActivity extends AppCompatActivity {
             }
         } else if (isSearchingPokemon) {
             fetchPokemonData();
+        } else if (isSearchingItem) {
+            fetchItems();
         }
 
         setupSearchView();
@@ -104,9 +114,20 @@ public class SearchActivity extends AppCompatActivity {
 
     private void filterList(String query) {
         if (query != null) {
-            List<OwnedPokemon> filteredList = allPokemon.stream()
-                    .filter(pokemon -> pokemon.getName().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
-                    .collect(Collectors.toList());
+            List<?> filteredList;
+            if (isSearchingItem) {
+                filteredList = allItems.stream()
+                        .filter(item -> item.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
+                        .collect(Collectors.toList());
+            } else if (isSearchingAbility) {
+                filteredList = abilityList.stream()
+                        .filter(ability -> ability.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
+                        .collect(Collectors.toList());
+            } else {
+                filteredList = allPokemon.stream()
+                        .filter(pokemon -> pokemon.getName().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
+                        .collect(Collectors.toList());
+            }
 
             searchResultAdapter.updateData(filteredList);
             Log.d(TAG, "filterList: Filtered list size: " + filteredList.size());
@@ -216,4 +237,37 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
     }
+    private void fetchItems() {
+        Log.d(TAG, "fetchItems: Starting to fetch items data...");
+        PokemonAPIClient.getApi().getItemList(1000).enqueue(new Callback<ItemResponseList>() {
+            @Override
+            public void onResponse(Call<ItemResponseList> call, Response<ItemResponseList> response) {
+                if (response.isSuccessful()) {
+                    List<ItemResponseList.Item> items = response.body().getResults();
+                    if (items != null) {
+                        List<String> itemNames = items.stream()
+                                .map(ItemResponseList.Item::getName)
+                                .collect(Collectors.toList());
+
+                        allItems.clear();
+                        allItems.addAll(itemNames);
+                        searchResultAdapter.updateData(allItems);
+                        Log.d(TAG, "fetchItems: Received items list with size: " + allItems.size());
+                    } else {
+                        Log.e(TAG, "fetchItems: Items list is null");
+                    }
+                } else {
+                    Log.e(TAG, "fetchItems: Failed to load items");
+                    Toast.makeText(SearchActivity.this, "Failed to load items", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ItemResponseList> call, Throwable t) {
+                Log.e(TAG, "fetchItems: Error fetching items", t);
+                Toast.makeText(SearchActivity.this, "Error fetching items", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

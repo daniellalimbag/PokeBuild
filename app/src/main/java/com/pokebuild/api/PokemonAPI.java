@@ -1,5 +1,6 @@
 package com.pokebuild.api;
 
+import com.pokebuild.model.ItemResponseList;
 import com.pokebuild.model.PokemonDetailResponse;
 import com.pokebuild.model.PokemonListResponse;
 import retrofit2.Call;
@@ -13,4 +14,7 @@ public interface PokemonAPI {
 
     @GET("pokemon/{name}")
     Call<PokemonDetailResponse> getPokemonByName(@Path("name") String name);
+
+    @GET("item")
+    Call<ItemResponseList> getItemList(@Query("limit") int limit);
 }

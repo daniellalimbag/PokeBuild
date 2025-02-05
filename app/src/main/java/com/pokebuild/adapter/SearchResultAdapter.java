@@ -14,16 +14,20 @@ import java.util.List;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultViewHolder> {
 
-    private List<OwnedPokemon> items;
+    private List<Object> items;
     private OnItemClickListener onItemClickListener;
+    private boolean isAbilitySearch;
+    private boolean isItemSearch;
 
     public interface OnItemClickListener {
-        void onPokemonClick(OwnedPokemon pokemon);
+        void onItemClick(Object item);
     }
 
-    public SearchResultAdapter(List<OwnedPokemon> items, OnItemClickListener onItemClickListener) {
+    public SearchResultAdapter(List<Object> items, OnItemClickListener onItemClickListener, boolean isAbilitySearch, boolean isItemSearch) {
         this.items = items;
         this.onItemClickListener = onItemClickListener;
+        this.isAbilitySearch = isAbilitySearch;
+        this.isItemSearch = isItemSearch;
     }
 
     @NonNull
@@ -35,34 +39,46 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultViewHo
 
     @Override
     public void onBindViewHolder(@NonNull SearchResultViewHolder holder, int position) {
-        OwnedPokemon item = items.get(position);
-        // If the item has an ability, show that instead of the name
-        String displayText = item.getAbility() != null && !item.getAbility().isEmpty()
-                ? item.getAbility()
-                : item.getName();
-        holder.resultTv.setText(displayText);
+        Object currentItem = items.get(position);
 
-        // Only load image if it's a Pokemon (has a sprite)
-        if (item.getSprite() != null && !item.getSprite().isEmpty()) {
-            holder.resultIv.setVisibility(View.VISIBLE);
-            Picasso.get()
-                    .load(item.getSprite())
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.error_image)
-                    .into(holder.resultIv);
-        } else {
-            holder.resultIv.setVisibility(View.GONE);
+        if (isAbilitySearch && currentItem instanceof OwnedPokemon) {
+            setAbilityView(holder, (OwnedPokemon) currentItem);
+        } else if (isItemSearch && currentItem instanceof String) {
+            setItemView(holder, (String) currentItem);
+        } else if (currentItem instanceof OwnedPokemon) {
+            setPokemonView(holder, (OwnedPokemon) currentItem);
         }
-
-        holder.itemView.setOnClickListener(v -> onItemClickListener.onPokemonClick(item));
     }
+
+    private void setAbilityView(SearchResultViewHolder holder, OwnedPokemon pokemon) {
+        holder.resultTv.setText(pokemon.getAbility());
+        holder.resultIv.setVisibility(View.GONE);
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(pokemon.getAbility()));
+    }
+
+    private void setItemView(SearchResultViewHolder holder, String itemName) {
+        holder.resultTv.setText(itemName);
+        holder.resultIv.setVisibility(View.GONE);
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(itemName));
+    }
+
+    private void setPokemonView(SearchResultViewHolder holder, OwnedPokemon pokemon) {
+        holder.resultTv.setText(pokemon.getName());
+        Picasso.get()
+                .load(pokemon.getSprite())
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.error_image)
+                .into(holder.resultIv);
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(pokemon));
+    }
+
     @Override
     public int getItemCount() {
-        return items.size();
+        return items != null ? items.size() : 0;
     }
 
-    public void updateData(List<OwnedPokemon> newItems) {
-        items = newItems;
+    public void updateData(List<?> newItems) {
+        items = (List<Object>) newItems;
         notifyDataSetChanged();
     }
 }
