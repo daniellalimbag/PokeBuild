@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
-public class Pokemon implements Serializable {
+public class OwnedPokemon implements Serializable {
     private int dexNum;
     private String name;
     private String url;
@@ -16,7 +16,7 @@ public class Pokemon implements Serializable {
     private String item;
 
     // Constructor
-    public Pokemon(int dexNum, String name, String url, String sprite, String type, String ability, String moves, String item) {
+    public OwnedPokemon(int dexNum, String name, String url, String sprite, String type, String ability, String moves, String item) {
         this.dexNum = dexNum;
         this.name = name;
         this.url = url;
