@@ -38,9 +38,6 @@ PokeBuild is an Android app project that allows users to create, manage, and sav
   ```
   The APK will be in `app/build/outputs/apk/debug/`.
 
-## Screenshot
-![App Screenshot](./pokebuild.png)
-
 ## Project Structure
 - `app/` — Android app module
 - `build.gradle.kts` — Root Gradle config
